@@ -67,18 +67,34 @@ public class ExtractModels extends JFrame {
                         }
                     }
                     
+                    //print dataset
+//                    System.out.println("Features : "+feature+" terdiri dari "+features+" fitur");
+//                    for (int i = 0; i < dataset.length; i++) {
+//                        for (int j = 0; j < dataset[0].length; j++) {
+//                            System.out.print(dataset[i][j]+"\t");
+//                        }
+//                        System.out.println("");
+//                    }
+                    
                     
                     for (int index = 0; index < classes.length; index++) {
                         double[] classList = new double[961];
                         for (int i = 0; i < classList.length - 1; i++) {
-                            if (dataset[i][features].equals(classes[index])) {
+                            if (dataset[i+1][features].equals(classes[index])) {
                                 classList[i] = 1;
                             } else {
                                 classList[i] = -1;
                             }
                         }
                         classList[960] = 0;
-
+                        
+//                        //classlist
+//                        System.out.println("Class : "+classes[index]);
+//                        for (int i = 0; i < classList.length; i++) {
+//                            System.out.println(i+" ->   "+classList[i]);
+//                        }
+//                        System.out.println("===========================");
+                        
                         //create RBF Matrix
                         double[][] rbfMatrix = svm.createRBFMatrix(data, sigma);
                         double[][] linearEquation = svm.createLinearEquationMatrix(rbfMatrix, classList);

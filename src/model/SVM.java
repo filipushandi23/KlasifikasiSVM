@@ -107,6 +107,7 @@ public class SVM {
         //Jumlah dari perkalian alpha-i dengan K(X,Xi) dengan Yi
         for (int i = 0; i < classList.length - 1; i++) {
             value += solutions[i] * rbfTest[i] * classList[i];
+//            System.out.println(solutions[i]+" * "+rbfTest[i]+" * "+classList[i]);
         }
 
         //jumlah perkalian diatas ditambah dengan bias

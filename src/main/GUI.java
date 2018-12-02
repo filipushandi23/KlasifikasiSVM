@@ -87,7 +87,7 @@ public class GUI extends javax.swing.JFrame {
 
         jLabel2.setText("Total Features");
 
-        featuresList.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "glcm", "morph", "color", "glcm+color","glcm+morph" }));
+        featuresList.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "glcm", "morph", "color", "glcm+color","glcm+color+morph" }));
 
         jLabel3.setText("Features List");
 
@@ -98,17 +98,16 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(trainDataBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(trainDataBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)
                     .addComponent(testDataBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(featuresList, 0, 85, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(featuresList, 0, 164, Short.MAX_VALUE)
                             .addComponent(totalFeatures)
                             .addComponent(sigmaValue))))
                 .addGap(18, 18, 18)
@@ -147,63 +146,78 @@ public class GUI extends javax.swing.JFrame {
     private void trainDataBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_trainDataBtnActionPerformed
 
         //parameter
-        String feature = featuresList.getSelectedItem().toString();
-        String path = "C:\\Users\\Filipus\\Documents\\NetBeansProjects\\KlasifikasiSVM\\feature-data\\" + feature + "\\" + feature + "-training.csv";
-        double sigma = Double.parseDouble(sigmaValue.getText());
-        int features = Integer.parseInt(totalFeatures.getText());
+                String feature = featuresList.getSelectedItem().toString();
+                String path = "C:\\Users\\Filipus\\Documents\\NetBeansProjects\\KlasifikasiSVM\\feature-data\\"+feature+"\\"+feature+"-training.csv";
+                double sigma = Double.parseDouble(sigmaValue.getText());
+                int features = Integer.parseInt(totalFeatures.getText());
+                
+                try {
+                    String[][] dataset = RWFile.getDataFromText2D(path, 961, (features+1));
+                    double[][] data = new double[960][features];
 
-        try {
-            String[][] dataset = RWFile.getDataFromText2D(path, 961, (features + 1));
-            double[][] data = new double[960][features];
-
-            for (int i = 1; i < dataset.length; i++) {
-                for (int j = 0; j < dataset[0].length - 1; j++) {
-                    data[i - 1][j] = Double.parseDouble(dataset[i][j]);
-                }
-            }
-
-            for (int index = 0; index < classes.length; index++) {
-                double[] classList = new double[961];
-                for (int i = 0; i < classList.length - 1; i++) {
-                    if (dataset[i][features].equals(classes[index])) {
-                        classList[i] = 1;
-                    } else {
-                        classList[i] = -1;
+                    for (int i = 1; i < dataset.length; i++) {
+                        for (int j = 0; j < dataset[0].length - 1; j++) {
+                            data[i - 1][j] = Double.parseDouble(dataset[i][j]);
+                        }
                     }
-                }
-                classList[960] = 0;
+                    
+                    //print dataset
+//                    System.out.println("Features : "+feature+" terdiri dari "+features+" fitur");
+//                    for (int i = 0; i < dataset.length; i++) {
+//                        for (int j = 0; j < dataset[0].length; j++) {
+//                            System.out.print(dataset[i][j]+"\t");
+//                        }
+//                        System.out.println("");
+//                    }
+                    
+                    
+                    for (int index = 0; index < classes.length; index++) {
+                        double[] classList = new double[961];
+                        for (int i = 0; i < classList.length - 1; i++) {
+                            if (dataset[i+1][features].equals(classes[index])) {
+                                classList[i] = 1;
+                            } else {
+                                classList[i] = -1;
+                            }
+                        }
+                        classList[960] = 0;
+                        
+//                        //classlist
+//                        System.out.println("Class : "+classes[index]);
+//                        for (int i = 0; i < classList.length; i++) {
+//                            System.out.println(i+" ->   "+classList[i]);
+//                        }
+//                        System.out.println("===========================");
+                        
+                        //create RBF Matrix
+                        double[][] rbfMatrix = svm.createRBFMatrix(data, sigma);
+                        double[][] linearEquation = svm.createLinearEquationMatrix(rbfMatrix, classList);
 
-                //create RBF Matrix
-                double[][] rbfMatrix = svm.createRBFMatrix(data, sigma);
-                double[][] linearEquation = svm.createLinearEquationMatrix(rbfMatrix, classList);
+                        Matrix solutions = svm.getSolutions(linearEquation, classList);
+                        //print solutions
+                        for (int i = 0; i < linearEquation.length; i++) {
+                            System.out.println("X - " + (i + 1) + " : " + solutions.get(i, 0));
+                        }
 
-                Matrix solutions = svm.getSolutions(linearEquation, classList);
-                //print solutions
-                for (int i = 0; i < linearEquation.length; i++) {
-                    System.out.println("X - " + (i + 1) + " : " + solutions.get(i, 0));
-//                    textArea.append("X - " + (i + 1) + " : " + solutions.get(i, 0)+"\n");
-                }
+                        System.out.println("Model for " + classes[index] + " with " + feature + " feature is saved!");
+                        String saveModel = "C:\\Users\\Filipus\\Documents\\NetBeansProjects\\KlasifikasiSVM\\models\\sigma-"+(int) sigma;
+                        StringBuilder builder = new StringBuilder();
 
-//                System.out.println("Model for " + classes[index] + " with " + feature + " feature is saved!");
-                textArea.append("Model for " + classes[index] + " with " + feature + " feature is saved!"+"\n");
-                String saveModel = "C:\\Users\\Filipus\\Documents\\NetBeansProjects\\KlasifikasiSVM\\models\\sigma-" + (int) sigma;
-                StringBuilder builder = new StringBuilder();
+                        for (int i = 0; i < linearEquation.length; i++) {
+                            builder.append(solutions.get(i, 0));
+                            builder.append(System.getProperty("line.separator"));
+                        }
 
-                for (int i = 0; i < linearEquation.length; i++) {
-                    builder.append(solutions.get(i, 0));
-                    builder.append(System.getProperty("line.separator"));
-                }
-
-                BufferedWriter writer = new BufferedWriter(new FileWriter(saveModel + "\\" + feature + "\\model-" + classes[index] + ".txt"));
-                writer.write(builder.toString());//save the string representation of the board
-                writer.close();
-            }
-
+                        BufferedWriter writer = new BufferedWriter(new FileWriter(saveModel + "\\" + feature + "\\model-" + classes[index] + ".txt"));
+                        writer.write(builder.toString());//save the string representation of the board
+                        writer.close();
+                    }
+                    
 //                    
-            JOptionPane.showMessageDialog(null, "Model Saved!");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+                    JOptionPane.showMessageDialog(null, "Model Saved!");
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
     }//GEN-LAST:event_trainDataBtnActionPerformed
 
     private void testDataBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testDataBtnActionPerformed
@@ -225,11 +239,13 @@ public class GUI extends javax.swing.JFrame {
                     
                     double truePositiveRateAvg = 0;
                     
+                    textArea.append("Result Classification using feature : "+feature+" with sigma = "+sigma+" \n");
+                    textArea.append("======================================================================\n");
                     for (int index = 0; index < classes.length; index++) {
 
                         double[] classList = new double[961];
                         for (int i = 0; i < classList.length - 1; i++) {
-                            if (dataset[i][5].equals(classes[index])) {
+                            if (dataset[i+1][features].equals(classes[index])) {
                                 classList[i] = 1;
                             } else {
                                 classList[i] = -1;
@@ -441,6 +457,8 @@ public class GUI extends javax.swing.JFrame {
                     }
                     System.out.println("True Positive Rate Avg: "+(truePositiveRateAvg/32));
                     textArea.append("True Positive Rate Avg: "+(truePositiveRateAvg/32)+"\n");
+                    textArea.append("\n===============================================\n");
+                    
 
                 } catch (IOException ex) {
                     ex.printStackTrace();

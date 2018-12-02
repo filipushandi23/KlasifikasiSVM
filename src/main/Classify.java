@@ -77,7 +77,7 @@ public class Classify extends JFrame {
 
                         double[] classList = new double[961];
                         for (int i = 0; i < classList.length - 1; i++) {
-                            if (dataset[i][5].equals(classes[index])) {
+                            if (dataset[i+1][features].equals(classes[index])) {
                                 classList[i] = 1;
                             } else {
                                 classList[i] = -1;
@@ -278,8 +278,8 @@ public class Classify extends JFrame {
                             } else {
                                 falseClassified++;
                             }
-//                            System.out.println("Result of classification: " + result);
-//                            System.out.println("====================================");
+                            System.out.println("Result of classification: " + result);
+                            System.out.println("====================================");
                         }
                             System.out.println("Total True Classified : " + trueClassified+" for "+classes[index]);
                             truePositiveRateAvg += (trueClassified/10);
